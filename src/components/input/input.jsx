@@ -48,7 +48,7 @@ function Input({
 }) {
   return (
     <DivInput width={width} height={height}>
-      <StyledLabel>{label}</StyledLabel>
+      <StyledLabel htmlFor={id || name}>{label}</StyledLabel>
       <BodyInput
         type={type}
         name={name}

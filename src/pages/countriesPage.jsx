@@ -1,7 +1,10 @@
 import styled from "@emotion/styled";
 import Input from "../components/input/input";
 import { FaSearch } from "react-icons/fa";
-
+import { useState } from "react";
+import { useQuery } from "@apollo/client";
+import { ALL_PAISES } from "../services/continents";
+import { CardCountry } from "../components/card/cardCountrie";
 //#region
   const ContentPage = styled.main`
     background-color: #28BDD155;
@@ -44,17 +47,47 @@ import { FaSearch } from "react-icons/fa";
     border-radius: 25px;
     border: none;
   `;
-  
+
+  const StyledSection = styled.section`
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 15px;
+    justify-content: center;
+    align-items: center;
+  `;
+
 //#endregion
 
 export function PageCountries(){
+  const [textSearch,setTextSearch] = useState("");
+  const { cargando, error , data }=useQuery (ALL_PAISES);   
+  const [filteredData, setFilteredData] = useState([]);
+
+  if(cargando)return 'Cargando...';   
+  if(error)return `¡Error! ${error.mensaje }`; 
+
+  function handleInputChange(textSearchValue){
+    const filteredResults = data.countries.filter((item) =>
+      item.name.toLowerCase().indexOf(textSearchValue.toLowerCase()) === 0
+    );
+    setFilteredData(filteredResults);
+  };
+  
   return (
     <ContentPage>
-      <StyledHeader>
+      <StyledHeader>  
         <ContentInput>
           <Input
+            name="countrySearch"
             label="País"
             placeholder="Escribe el País que deseas ver"
+            onKeyUp={(event) => {
+              setTextSearch(event.target.value)
+              }}
+            onChange={(event) => {
+              handleInputChange(event.target.value)
+              }}
           />
           <SytyledButton>
             <FaSearch />
@@ -62,9 +95,13 @@ export function PageCountries(){
           </SytyledButton>
         </ContentInput>
       </StyledHeader>
-      <section>
-        
-      </section>
+      <StyledSection>
+        {textSearch && filteredData.map(element=>(
+            <CardCountry key={element.name} element={element}/>
+          )) || data && data.countries.map(element=>(
+            <CardCountry key={element.name} element={element}/>
+        ))}
+      </StyledSection>
     </ContentPage>
   )
 }
